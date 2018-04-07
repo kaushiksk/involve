@@ -237,6 +237,20 @@ def transactions():
     return render_template('ledger.html', transactions=transactions)
 
     
+@app.route('/ledger', methods=['GET', 'POST'])
+def ledger():
+    if request.method == 'POST':
+        data = request.json["transaction_id"]
+        return jsonify({"constituency": "kar", "candidate_name": "John"})
+    else:
+        transactions = [{"timestamp": 1, "transaction_id": "A"},
+                        {"timestamp": 2, "transaction_id": "B"},
+                        {"timestamp": 3, "transaction_id": "C"},
+                        {"timestamp": 4, "transaction_id": "D"},
+                        {"timestamp": 5, "transaction_id": "E"},
+                      ]
+        return render_template('ledger.html', transactions=transactions)
+
 
 if __name__ =="__main__":
     app.secret_key = 'secret123'

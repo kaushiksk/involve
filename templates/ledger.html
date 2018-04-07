@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+{% block body %}
+    {% for transaction in transactions %}
+        <div class="row">
+            <div class="col-sm-4" >
+                <h6 class="">{{ transaction.timestamp }}</h6>
+            </div>
+            <div class="col-sm-4">
+                <h6 class="trasac_id">{{ transaction.transaction_id }}</h6>
+            </div>
+            <div class="col-sm-4">
+                 <button style="margin-left:1%;" class="btn btn-success view" id={{ transaction.transaction_id }}>View</button>
+            </div>
+        </div>
+    {% endfor %}
+     <script type="text/javascript">
+        $(".view").click(function() {
+            var id = this.id;
+            {#            $.confirm({#}
+            {#                title: "Confirm Vote?",#}
+            {#                content: "This action cannot be undone",#}
+            {#                draggable: true,#}
+            {#                icon:'fa fa-trash',#}
+            {#                backgroundDismiss: true,#}
+            {#                theme:"modern",#}
+            {#                type:"red"});#}
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: "/ledger",
+                data: JSON.stringify({"transaction_id": id}),
+                success: function (stuff) {
+
+                    $.alert({
+                        title: 'Smart Contract Information',
+                        content: 'Constituency : ' + stuff["constituency"] + " Candidate:" + stuff["candidate_name"],
+                        icon: 'fa fa-check',
+                        theme: "modern",
+                        type: "green"
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}
