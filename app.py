@@ -230,7 +230,7 @@ def logout():
 
 @app.route('/vote', methods=['GET','POST'])
 def vote():
-    candidate = request.json["candidate"]
+    [candidate, c_id] = request.json["candidate"].split("-")
     constituency = request.json["constituency"]
     print(candidate, constituency)
 
