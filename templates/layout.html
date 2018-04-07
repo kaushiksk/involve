@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+
+  <title>read-it-later</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+  <script src="{{ url_for('static',filename='js/jquery-3.2.1.min.js') }}"></script>
+  <script src="{{ url_for('static',filename='js/jquery.min-1.12.4.js') }}"></script>
+  <script src="{{ url_for('static',filename='js/jquery-confirm.min.js') }}/"></script>
+  <script src="{{ url_for('static',filename='js/bootstrap.min-3.3.7.js') }}/"></script>
+  <script src="{{ url_for('static',filename='js/font-awesome.js') }}/"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.min-3.3.7.css') }}">
+  <link href="{{ url_for('static',filename='css/header.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static',filename='css/animate.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static',filename='css/jquery-confirm.min.css') }}" rel="stylesheet">
+  <link href="static/css/flat-ui.css" rel="stylesheet">
+  <link href="static/css/search_filter.css" rel="stylesheet">
+
+  {% block style %} {% endblock %}
+
+
+</head>
+
+<body>
+    <div class="container">
+      {% include 'includes/_navbar.html' %}
+      {% include 'includes/_messages.html' %}
+
+      {% block body %} {% endblock %}
+
+      <footer class="footer">
+          <p>&copy; involve_2018</p>
+      </footer>
+
+    </div>
+</body>
+{% block script %} {% endblock %}
+
+<script>
+
+$(".alert-success").fadeOut(3000);
+  $(function() {
+  // get current URL path and assign 'active' class
+  var pathname = window.location.pathname;
+  console.log(pathname);
+  $('.nav > li > a[href="'+pathname+'"]').parent().addClass('active');
+  $('form > label').addClass('sr-only');
+
+});
+</script>
+</html>

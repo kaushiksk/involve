@@ -1,0 +1,195 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+
+<div class="row">
+<!--style="position:fixed;  float:none; display: inline-block;-->
+  <div class="col-sm-7" >
+    
+  </div>
+
+<div class="col-sm-5" style="overflow-y:scroll; height:100vh;">
+
+  {% for candidate in candidates %}
+  <div class="row">
+            <div class="col-md-5">
+                <a href="#">
+                    <img class="img-responsive" src="{{candidate.thumb}}" alt="">
+                    <h6 class="cat"><strong>#{{ candidate.party}}</strong></h6	>
+                </a>
+            </div>
+            <div class="col-md-7">
+                <h3 class="animated fadeInUp" style="margin-top:0;">{{ candidate.name }}</h3> 
+                
+                <button style="margin-left:1%;" class="btn btn-default fui-checkbox-checked archive"  id="{{ candidate.id }}" title="Vote">
+                
+
+                             
+            </div>
+        </div>
+        <hr class="first">
+ 
+    {% endfor %}
+
+
+</div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+	$(".archive").click(function(){
+	var id = this.id;
+	var mytitle, mycontent;
+	if ($("#"+id).attr("title") == "vote"){
+		mytitle = 'Confirm the vote?';
+		mycontent = 'This candidate will receive your vote';
+		mycancel = 'You have not cast your vote yet!';
+	}
+	else{
+		mytitle = 'Want to unarchive?';
+		mycontent = 'This post will be pushed to the Unread section';
+		mycancel = 'The books stays in the archive section!';
+	}
+	$.confirm({
+    title: mytitle,
+    content: mycontent,
+	draggable: true,
+	icon:'fa fa-archive',
+	backgroundDismiss: true,
+	theme:"modern",
+	type:"orange",
+    buttons: {
+        confirm: {
+        btnClass: 'btn-orange',
+   		action: function () {
+        	$.ajax({
+			  type: "POST",
+			  contentType: "application/json; charset=utf-8",
+			  url: "/archive-toggle",
+			  data: JSON.stringify({ "b_id" : id }),
+			  success: function (stuff) {
+			    if ($("#"+id).attr("title") == "Archive"){
+	        		$("#"+id).removeClass('btn-warning');
+		        	$("#"+id).addClass('btn-default');
+		        	$("#"+id).attr("title", "Unarchive");
+		        	$.alert({
+       				 title: 'Bookmark successfully archived!',
+        			 content: 'The bookmark will no longer appear on your dashboard!',
+        			 icon:'fa fa-check',
+        			 theme: "modern",
+        			 type:"green"
+        			     });
+		        }
+		        else{
+		        	$("#"+id).removeClass('btn-default');
+		        	$("#"+id).addClass('btn-warning');
+		        	$("#"+id).attr("title", "Archive");
+		        	$.alert({
+       				 title: 'Bookmark successfully Unarchived!',
+        			 content: 'The bookmark is back in your dashboard!',
+        			 icon:'fa fa-check',
+        			 theme: "modern",
+        			 type:"green"
+        			     });
+		        }
+
+			  },
+			  dataType: "json"
+			});
+        	
+     
+            
+        }
+    },
+        cancel: function () {
+                $.alert({
+       				 title: 'Cancelled!',
+        			 content: mycancel,
+        			 theme: "light",
+        			 type:"green"
+    });
+        }
+    }
+});
+		
+	});
+
+
+	$(".delete").click(function(){
+	var id = this.id;
+	$.confirm({
+    title: "Confirm Delete?",
+    content: "This action cannot be undone",
+	draggable: true,
+	icon:'fa fa-trash',
+	backgroundDismiss: true,
+	theme:"modern",
+	type:"red",
+    buttons: {
+        delete: {
+        btnClass: 'btn-red',
+   		action: function () {
+        	$.ajax({
+			  type: "POST",
+			  contentType: "application/json; charset=utf-8",
+			  url: "/delete-bookmark",
+			  data: JSON.stringify({ "b_id-p_id" : id }),
+			  success: function (stuff) {
+			  		$("#"+id).closest(".row").removeClass("fadeInUp");
+		        	$("#"+id).closest(".row").addClass("fadeOutUp");
+		        	$.alert({
+       				 title: 'Bookmark deleted',
+        			 content: 'The bookmark has been removed permanently',
+        			 icon:'fa fa-check',
+        			 theme: "modern",
+        			 type:"green",
+        			 buttons:{
+        			 	ok: function(){
+        			 		$("#"+id).closest(".row").next("hr").remove();
+		        			$("#"+id).closest(".row").remove(); 
+        			     }
+        			 	}
+        			 });
+		        	
+
+		        	},
+			   dataType: "json"
+			});
+        	
+     
+            
+        }
+    },
+        cancel: function () {
+                $.alert({
+       				 title: 'Cancelled!',
+       				 content: "And that articles lives another day!",
+        			 theme: "modern",
+        			 type:"green"
+    });
+        }
+    }
+});
+		
+	});
+
+</script>
+
+{% endblock %}
+{% block style %}
+<style>
+.cat{
+	position:absolute; 
+	bottom:2%; 
+	left:1%; 
+	background-color: #48c9b0; 
+	color:#ffffff; 
+	text-transform: uppercase;
+	padding: 5px 5px;
+	border-radius: 5%;
+}
+</style>
+{% endblock %}
