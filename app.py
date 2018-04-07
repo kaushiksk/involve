@@ -15,6 +15,17 @@ from web3.contract import ConciseContract
 
 app = Flask(__name__)
 
+# Enter this information
+HOST = "localhost"
+USERNAME ="root" # change to your username and password
+PASSWORD = "appu"
+
+app.config['MYSQL_HOST'] = HOST
+app.config['MYSQL_USER'] = USERNAME
+app.config['MYSQL_PASSWORD'] = PASSWORD
+app.config['MYSQL_DB'] = 'codefundo'
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+
 http_provider = HTTPProvider('http://localhost:8545')
 eth_provider = Web3(http_provider).eth
 
