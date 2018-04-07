@@ -8,8 +8,8 @@ contract Vote {
     /* This function is executed at initialization and sets the owner of the contract */
     function Vote(bytes32 constituency, bytes32 candidate) public { 
             owner = msg.sender;
-           data.push(constituency);
-           data.push(candidate);
+            data.push(constituency);
+            data.push(candidate);
         }
     
     function info() public view returns(bytes32[]) {

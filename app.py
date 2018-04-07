@@ -9,9 +9,39 @@ from flask import (Flask, flash, jsonify, logging, redirect, render_template,
 # from forms import PostForm, RegisterForm
 # from passlib.hash import sha256_crypt
 from utils import parseme
+from solc import compile_source
+from web3 import Web3, HTTPProvider
+from web3.contract import ConciseContract
 
 app = Flask(__name__)
 
+http_provider = HTTPProvider('http://localhost:8545')
+eth_provider = Web3(http_provider).eth
+
+default_account = eth_provider.accounts[0]
+
+transaction_details = {
+    'from': default_account,
+}
+
+with open('Vote.sol') as file:
+    source_code = file.readlines()
+
+# compile the contract
+compiled_code = compile_source(''.join(source_code))
+
+contract_name = 'Vote'
+
+contract_bytecode = compiled_code["<stdin>:Vote"]['bin']
+contract_abi = compiled_code["<stdin>:Vote"]['abi']
+
+
+# create a contract factory. we'll use this to deploy any number of
+# instances of the contract to the chain
+contract_factory = eth_provider.contract(
+    abi=contract_abi,
+    bytecode=contract_bytecode,
+)
 
 
 @app.route('/')
@@ -69,10 +99,10 @@ def dashboard():
 
         myuser = {"first_name":"sadf", "last_name":"sadf", "roll_no":"123", "email":"sadf@asdf.com", "d_name":"dsadf"}
 
-        candidates = [{"id":1, "name":"xyz", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
-                        {"id":2, "name":"xyz", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
-                        {"id":3, "name":"xyz", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
-                        {"id":4, "name":"xyz", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"}
+        candidates = [{"id":1, "name":"A", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
+                        {"id":2, "name":"B", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
+                        {"id":3, "name":"C", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
+                        {"id":4, "name":"B", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"}
                         ]
 
         return render_template('dashboard.html', candidates=candidates, myuser=myuser)
@@ -80,24 +110,6 @@ def dashboard():
         flash('You need to be logged in to access!', 'danger')
         return redirect(url_for('login'))
 
-
-# Explore page routes
-@app.route('/explore', methods=['GET', 'POST'])
-def explore():
-    if 'logged_in' in session:
-
-        return render_template('explore.html')        
-
-        if request.method == 'POST':
-            print("jsonify?")
-            return jsonify({"data":"pass"})
-            # return jsonify({"data":data, "my_pids": my_pids})
-
-        if request.method =='GET':
-            return render_template('explore.html')
-    else:
-        flash('You need to be logged in to access!', 'danger')
-        return redirect(url_for('login'))
 
 
 @app.route('/add_bookmark', methods=['GET', 'POST'])
@@ -167,10 +179,26 @@ def logout():
 
 
 @app.route('/vote', methods=['GET','POST'])
-def add_message():
-    data = request.json["b_id"]
-    print(data)
-    return jsonify({"data": data})
+def vote():
+    candidate = request.json["candidate"]
+    constituency = request.json["constituency"]
+    print(candidate, constituency)
+
+    #TODO Update MySQL table with the data
+
+    transaction_hash = contract_factory.deploy(
+                            transaction=transaction_details,
+                            args=[constituency.encode(), candidate.encode()]
+                            )
+
+    transaction_receipt = eth_provider.getTransactionReceipt(transaction_hash)
+    contract_address = transaction_receipt['contractAddress']
+
+    #TODO Add transaction address with timestamp into DB
+
+
+    
+    return jsonify({"address": contract_address})
 
 
 if __name__ =="__main__":
