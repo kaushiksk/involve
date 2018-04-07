@@ -6,8 +6,8 @@ from pprint import pprint
 from flask import (Flask, flash, jsonify, logging, redirect, render_template,
                    request, session, url_for)
 #from flask_mysqldb import MySQL
-from forms import PostForm, RegisterForm
-from passlib.hash import sha256_crypt
+# from forms import PostForm, RegisterForm
+# from passlib.hash import sha256_crypt
 from utils import parseme
 
 app = Flask(__name__)
@@ -159,7 +159,6 @@ def addmybookmark():
     return jsonify({"data":"pass"})
 
 
-
 @app.route('/logout')
 def logout():
     session.clear()
@@ -167,8 +166,14 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/vote', methods=['GET','POST'])
+def add_message():
+    data = request.json["b_id"]
+    print(data)
+    return jsonify({"data": data})
+
 
 if __name__ =="__main__":
     app.secret_key = 'secret123'
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(host="0.0.0.0", debug=True, threaded=True)
+    app.run(host="localhost", debug=True, threaded=True)

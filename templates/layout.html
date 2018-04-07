@@ -42,16 +42,4 @@
 </body>
 {% block script %} {% endblock %}
 
-<script>
-
-$(".alert-success").fadeOut(3000);
-  $(function() {
-  // get current URL path and assign 'active' class
-  var pathname = window.location.pathname;
-  console.log(pathname);
-  $('.nav > li > a[href="'+pathname+'"]').parent().addClass('active');
-  $('form > label').addClass('sr-only');
-
-});
-</script>
 </html>
