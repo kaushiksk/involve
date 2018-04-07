@@ -8,24 +8,12 @@ from flask import (Flask, flash, jsonify, logging, redirect, render_template,
 #from flask_mysqldb import MySQL
 # from forms import PostForm, RegisterForm
 # from passlib.hash import sha256_crypt
-from flask_mysqldb import MySQL
 from utils import parseme
 from solc import compile_source
 from web3 import Web3, HTTPProvider
 from web3.contract import ConciseContract
 
 app = Flask(__name__)
-
-# Enter this information
-HOST = "localhost"
-USERNAME ="root" # change to your username and password
-PASSWORD = "root"
-
-app.config['MYSQL_HOST'] = HOST
-app.config['MYSQL_USER'] = USERNAME
-app.config['MYSQL_PASSWORD'] = PASSWORD
-app.config['MYSQL_DB'] = 'project'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 http_provider = HTTPProvider('http://localhost:8545')
 eth_provider = Web3(http_provider).eth
@@ -196,8 +184,6 @@ def vote():
     constituency = request.json["constituency"]
     print(candidate, constituency)
 
-    #TODO Update MySQL table with the data
-
     transaction_hash = contract_factory.deploy(
                             transaction=transaction_details,
                             args=[constituency.encode(), candidate.encode()]
@@ -206,12 +192,27 @@ def vote():
     transaction_receipt = eth_provider.getTransactionReceipt(transaction_hash)
     contract_address = transaction_receipt['contractAddress']
 
-    #TODO Add transaction address with timestamp into DB
+    #TODO Add transaction address with timestamp into DB with candidate foreign key
 
-
-    
     return jsonify({"address": contract_address})
 
+@app.route('/transactions', methods=['GET','POST'])
+def transactions():
+    if  request.method == 'POST':
+        # Asking for sepcific candidates transactions
+        candidate = request.json("candidate")
+
+        #TODO Query db for candidates transactions
+        transactions = False
+    
+    else:
+        # GET REQUEST
+        # TODO Get all transactions from DB
+        transactions = False
+    
+    return render_template('ledger.html', transactions=transactions)
+
+    
 
 if __name__ =="__main__":
     app.secret_key = 'secret123'
