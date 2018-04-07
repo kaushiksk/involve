@@ -18,7 +18,7 @@ app = Flask(__name__)
 # Enter this information
 HOST = "localhost"
 USERNAME ="root" # change to your username and password
-PASSWORD = "appu"
+PASSWORD = "appu" #Kernelpanic
 
 app.config['MYSQL_HOST'] = HOST
 app.config['MYSQL_USER'] = USERNAME
@@ -113,7 +113,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'logged_in' in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('transactions'))
 
     if request.method == 'POST':
         # Get form feilds
@@ -123,9 +123,10 @@ def login():
 
         session['logged_in'] = True
         session['username'] = username
+        session['admin'] = True
 
         flash('You are now logged in', 'success')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('transactions'))
 
 
     return render_template('login.html')
@@ -160,7 +161,72 @@ def dashboard():
         flash('You need to be logged in to access!', 'danger')
         return redirect(url_for('login'))
 
+@app.route('/vote', methods=['GET','POST'])
+def vote():
+    print(request.json["candidate"])
+    [candidate, c_id] = request.json["candidate"].split("-")
+    constituency = request.json["constituency"]
+    print(candidate, constituency)
 
+    transaction_hash = contract_factory.constructor(
+                            constituency.encode(), candidate.encode()).transact(transaction=transaction_details)
+
+    transaction_receipt = eth_provider.getTransactionReceipt(transaction_hash)
+    contract_address = transaction_receipt['contractAddress']
+
+    #TODO Add transaction address with timestamp into DB with candidate foreign key
+
+    cur = mysql.connection.cursor()
+    cur.execute("""INSERT 
+                    INTO 
+                    transactions
+                    (c_id, t_id, stamp) 
+                    VALUES({0}, \'{1}\', NOW());""".format(c_id, contract_address))
+
+    cur.close();
+
+    mysql.connection.commit()    
+
+    return jsonify({"address": contract_address})
+
+@app.route('/transactions', methods=['GET','POST'])
+def transactions():
+    if  request.method == 'POST':
+        # Asking for sepcific candidates transactions
+        candidate = request.json("candidate")
+
+        #TODO Query db for candidates transactions
+        transactions = False
+    
+    else:
+        # GET REQUEST
+        cur = mysql.connection.cursor()
+        cur.execute("""SELECT
+                        DATE_FORMAT(stamp, '%d/%m/%Y %H:%i:%S') AS timestamp,
+                        t_id
+                        FROM transactions
+                        ORDER BY stamp DESC;""")
+
+        transactions = list(cur.fetchall())
+        cur.close()
+    
+    return render_template('ledger.html', transactions=transactions)
+
+@app.route('/ledger', methods=['GET', 'POST'])
+def ledger():
+    if request.method == 'POST':
+        transaction = request.json["transaction_id"]
+        cur = mysql.connection.cursor()
+        cur.execute("""SELECT
+                        name,
+                        constituency
+                        FROM candidates C JOIN transactions T
+                        ON C.c_id=T.c_id                      
+                        WHERE t_id=\'{}\';""".format(transaction))
+
+        candidate = list(cur.fetchall())[0]
+        cur.close()
+        return jsonify(candidate)
 
 @app.route('/add_bookmark', methods=['GET', 'POST'])
 def add_bookmark():
@@ -203,6 +269,7 @@ def myaccount():
         flash('You need to be logged in to access!', 'danger')
         return redirect(url_for('login'))
 
+
 @app.route('/archive-toggle', methods=['POST'])
 def archive():   
     return jsonify({"data":"pass"})
@@ -226,54 +293,6 @@ def logout():
     session.clear()
     flash('You are now logged out', 'success')
     return redirect(url_for('register'))
-
-
-@app.route('/vote', methods=['GET','POST'])
-def vote():
-    [candidate, c_id] = request.json["candidate"].split("-")
-    constituency = request.json["constituency"]
-    print(candidate, constituency)
-
-    transaction_hash = contract_factory.constructor(
-                            constituency.encode(), candidate.encode()).transact(transaction=transaction_details)
-
-    transaction_receipt = eth_provider.getTransactionReceipt(transaction_hash)
-    contract_address = transaction_receipt['contractAddress']
-
-    #TODO Add transaction address with timestamp into DB with candidate foreign key
-
-    return jsonify({"address": contract_address})
-
-@app.route('/transactions', methods=['GET','POST'])
-def transactions():
-    if  request.method == 'POST':
-        # Asking for sepcific candidates transactions
-        candidate = request.json("candidate")
-
-        #TODO Query db for candidates transactions
-        transactions = False
-    
-    else:
-        # GET REQUEST
-        # TODO Get all transactions from DB
-        transactions = False
-    
-    return render_template('ledger.html', transactions=transactions)
-
-    
-@app.route('/ledger', methods=['GET', 'POST'])
-def ledger():
-    if request.method == 'POST':
-        data = request.json["transaction_id"]
-        return jsonify({"constituency": "kar", "candidate_name": "John"})
-    else:
-        transactions = [{"timestamp": 1, "transaction_id": "A"},
-                        {"timestamp": 2, "transaction_id": "B"},
-                        {"timestamp": 3, "transaction_id": "C"},
-                        {"timestamp": 4, "transaction_id": "D"},
-                        {"timestamp": 5, "transaction_id": "E"},
-                      ]
-        return render_template('ledger.html', transactions=transactions)
 
 
 if __name__ =="__main__":

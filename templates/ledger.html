@@ -1,16 +1,28 @@
 {% extends 'layout.html' %}
 {% block body %}
+ <div class="row" style=" border-bottom: 1px solid #ccc; text-align:center;">
+            <div class="col-sm-2" >
+                <h6 class="" style="text-transform:uppercase" >Timestamp</h6>
+            </div>
+            <div class="col-sm-8" >
+                <h6 class="trasac_id" style="text-transform:uppercase">Contract Address</h6>
+            </div>
+
+
+        </div>
+
     {% for transaction in transactions %}
-        <div class="row">
-            <div class="col-sm-4" >
-                <h6 class="">{{ transaction.timestamp }}</h6>
+        <div class="row" style=" border-bottom: 1px solid #ccc;text-align:center;">
+            <div class="col-sm-2" >
+                <h6 class="" style="font-size:medium;">{{ transaction.timestamp }}</h6>
             </div>
-            <div class="col-sm-4">
-                <h6 class="trasac_id">{{ transaction.transaction_id }}</h6>
+            <div class="col-sm-8">
+                <h6 class="trasac_id">{{ transaction.t_id }}</h6>
             </div>
-            <div class="col-sm-4">
-                 <button style="margin-left:1%;" class="btn btn-success view" id={{ transaction.transaction_id }}>View</button>
+            <div class="col-sm-2" style="margin-top:0.5%;">
+                 <button class="btn btn-success view" id={{ transaction.t_id }}>View</button>
             </div>
+
         </div>
     {% endfor %}
      <script type="text/javascript">
@@ -33,8 +45,8 @@
                 success: function (stuff) {
 
                     $.alert({
-                        title: 'Smart Contract Information',
-                        content: 'Constituency : ' + stuff["constituency"] + " Candidate:" + stuff["candidate_name"],
+                        title: 'Constituency : ' + stuff["constituency"] + "\n\n" + " Candidate: " + stuff["name"],
+                        content: 'Smart Contract Information',
                         icon: 'fa fa-check',
                         theme: "modern",
                         type: "green"
