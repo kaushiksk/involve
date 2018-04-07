@@ -14,6 +14,7 @@
 <div class="col-sm-7" style="overflow-y:scroll; height:100vh;">
 
   {% for candidate in candidates %}
+  {% set name = candidate.name + "-" + candidate.c_id|string %}
   <div class="row" >
             <div class="col-md-3" style="height: 30px">
                 <a href="#">
@@ -23,7 +24,7 @@
             </div>
             <div class="col-md-9">
 {#                <form>#}
-                  <input type="radio" name="voter_id" value={{ candidate.name }}>{{ candidate.name }} <br>
+                  <input type="radio" name="voter_id" value={{ name }}>{{ candidate.name }} <br>
 {#                </form>#}
 {#                <h3 class="animated fadeInUp" style="margin-top:0;">{{ candidate.name }}</h3>#}
 {##}

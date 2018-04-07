@@ -73,8 +73,32 @@ def register():
     if request.method == 'POST':
         # Get form feilds
         adhaar = request.form['adhaar']
-        #dob = request.form['dob']
+        dob = request.form['dob']
      
+        cur = mysql.connection.cursor()
+        cur.execute("""SELECT
+                        *
+                        FROM voters                        
+                        WHERE u_id=\'{}\';""".format(adhaar))
+
+        data = list(cur.fetchall())
+        cur.close()
+
+        if(len(data)==0):
+            cur = mysql.connection.cursor()
+            cur.execute("""INSERT INTO
+                        voters
+                        (u_id, voted)
+                        VALUES
+                        ({0},1);""".format(adhaar))
+
+            cur.close()
+
+            mysql.connection.commit()
+
+        else:
+            flash('You have already voted!', 'danger')
+            return redirect(url_for('register'))
 
         session['logged_in'] = True
         session['username'] = adhaar
@@ -206,7 +230,7 @@ def logout():
 
 @app.route('/vote', methods=['GET','POST'])
 def vote():
-    candidate = request.json["candidate"]
+    [candidate, c_id] = request.json["candidate"].split("-")
     constituency = request.json["constituency"]
     print(candidate, constituency)
 
