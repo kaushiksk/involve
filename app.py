@@ -215,18 +215,24 @@ def transactions():
 @app.route('/ledger', methods=['GET', 'POST'])
 def ledger():
     if request.method == 'POST':
-        transaction = request.json["transaction_id"]
-        cur = mysql.connection.cursor()
-        cur.execute("""SELECT
-                        name,
-                        constituency
-                        FROM candidates C JOIN transactions T
-                        ON C.c_id=T.c_id                      
-                        WHERE t_id=\'{}\';""".format(transaction))
+        address = request.json["address"]
+        # cur = mysql.connection.cursor()
+        # cur.execute("""SELECT
+        #                 name,
+        #                 constituency
+        #                 FROM candidates C JOIN transactions T
+        #                 ON C.c_id=T.c_id                      
+        #                 WHERE t_id=\'{}\';""".format(address))
 
-        candidate = list(cur.fetchall())[0]
-        cur.close()
-        return jsonify(candidate)
+        # candidate = list(cur.fetchall())[0]
+        # cur.close()
+        contract_instance = eth_provider.contract(
+                                abi=contract_abi,
+                                address=address,
+                                ContractFactoryClass=ConciseContract
+                                )
+        constituency, candidate = contract_instance.info()
+        return jsonify({"name":candidate.decode(), "constituency":constituency.decode()})
 
 @app.route('/add_bookmark', methods=['GET', 'POST'])
 def add_bookmark():

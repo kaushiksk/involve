@@ -41,12 +41,12 @@
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 url: "/ledger",
-                data: JSON.stringify({"transaction_id": id}),
+                data: JSON.stringify({"address": id}),
                 success: function (stuff) {
 
                     $.alert({
                         title: 'Constituency : ' + stuff["constituency"] + "\n\n" + " Candidate: " + stuff["name"],
-                        content: 'Smart Contract Information',
+                        content: 'Smart Contract Information fetched from ' + id,
                         icon: 'fa fa-check',
                         theme: "modern",
                         type: "green"
