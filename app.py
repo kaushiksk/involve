@@ -5,7 +5,7 @@ from collections import Counter
 from pprint import pprint
 from flask import (Flask, flash, jsonify, logging, redirect, render_template,
                    request, session, url_for)
-#from flask_mysqldb import MySQL
+from flask_mysqldb import MySQL
 # from forms import PostForm, RegisterForm
 # from passlib.hash import sha256_crypt
 from utils import parseme
@@ -25,6 +25,9 @@ app.config['MYSQL_USER'] = USERNAME
 app.config['MYSQL_PASSWORD'] = PASSWORD
 app.config['MYSQL_DB'] = 'codefundo'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+
+#init MYSQL_DB
+mysql = MySQL(app)
 
 http_provider = HTTPProvider('http://localhost:8545')
 eth_provider = Web3(http_provider).eth
@@ -108,13 +111,25 @@ def login():
 def dashboard():
     if 'logged_in' in session:
 
-        myuser = {"first_name":"sadf", "last_name":"sadf", "roll_no":"123", "email":"sadf@asdf.com", "d_name":"dsadf"}
+        myuser = {"first_name":"sadf", "last_name":"sadf", "roll_no":"123", "email":"sadf@asdf.com", "d_name":"dsadf", "constituency":"Mangaluru"}
 
-        candidates = [{"id":1, "name":"A", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
-                        {"id":2, "name":"B", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
-                        {"id":3, "name":"C", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
-                        {"id":4, "name":"B", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"}
-                        ]
+        cur = mysql.connection.cursor()
+        cur.execute("""SELECT
+                        c_id,
+                        name,
+                        constituency,
+                        thumb
+                        FROM candidates                        
+                        WHERE constituency=\'{}\';""".format(myuser["constituency"]))
+
+        candidates = list(cur.fetchall())
+        cur.close()
+
+        # candidates = [{"id":1, "name":"A", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
+        #                 {"id":2, "name":"B", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
+        #                 {"id":3, "name":"C", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
+        #                 {"id":4, "name":"B", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"}
+        #                 ]
 
         return render_template('dashboard.html', candidates=candidates, myuser=myuser)
     else:
@@ -186,7 +201,7 @@ def addmybookmark():
 def logout():
     session.clear()
     flash('You are now logged out', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('register'))
 
 
 @app.route('/vote', methods=['GET','POST'])
@@ -195,10 +210,8 @@ def vote():
     constituency = request.json["constituency"]
     print(candidate, constituency)
 
-    transaction_hash = contract_factory.deploy(
-                            transaction=transaction_details,
-                            args=[constituency.encode(), candidate.encode()]
-                            )
+    transaction_hash = contract_factory.constructor(
+                            constituency.encode(), candidate.encode()).transact(transaction=transaction_details)
 
     transaction_receipt = eth_provider.getTransactionReceipt(transaction_hash)
     contract_address = transaction_receipt['contractAddress']

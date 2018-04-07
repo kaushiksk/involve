@@ -64,11 +64,23 @@
 			  type: "POST",
 			  contentType: "application/json; charset=utf-8",
 			  url: "/vote",
-			  data: JSON.stringify({ "b_id" :option}),
-			  success: function () {
-			    alert("Sent successfully");
+			  data: JSON.stringify({ "candidate" :option, "constituency":"Mangaluru"}),
+			  success: function (stuff) {
+            $.alert({
+               title: 'Vote Successfull!',
+               content: 'Contract updated. \n ContractAddr : ' + stuff["address"],
+               icon:'fa fa-check',
+               theme: "modern",
+               type:"green",
+               buttons:{
+                  ok: function(okbutton){
+                    window.location  = '/logout';
+                  }
+               }
+                   });
+
 		        }});
-{#        window.location.href = "/vote"#}
+        
     });
 </script>
 {% endblock %}
