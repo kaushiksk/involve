@@ -69,7 +69,11 @@ def dashboard():
 
         myuser = {"first_name":"sadf", "last_name":"sadf", "roll_no":"123", "email":"sadf@asdf.com", "d_name":"dsadf"}
 
-        candidates = [{"id":1, "name":"xyz", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"}]
+        candidates = [{"id":1, "name":"xyz", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
+                        {"id":2, "name":"xyz", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
+                        {"id":3, "name":"xyz", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"},
+                        {"id":4, "name":"xyz", "party":"abc", "thumb":"https://qph.fs.quoracdn.net/main-qimg-aefe19660cb326f3679e526f4bf7ac0a"}
+                        ]
 
         return render_template('dashboard.html', candidates=candidates, myuser=myuser)
     else:

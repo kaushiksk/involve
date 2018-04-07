@@ -2,27 +2,27 @@
 
 {% block body %}
 <div class="jumbotron">
-  <h1 style="text-align:center;" class="animated fadeInUp">Register</h1>
+  
+  <h1 style="text-align:center;" class="animated fadeInUp">Authenticate</h1>
 
 
-<div class="login-form">
- <form method="POST" action="" class="form-signin animated fadeInUp">
+  <div class="login-form">
+   <form method="POST" action="" class="form-signin animated fadeInUp">
+              
+      <div class="form-group animated fadeInUp">
+        <input type="text" class="form-control login-field" placeholder="Enter 12-digit Adhaar number" pattern="[0-9]{12}"id="login-name" name="adhaar" required autofocus value={{request.form.adhaar}}>
+        <label class="login-field-icon fui-user" for="login-name"></label>
+      </div>
 
-            
-            <div class="form-group animated fadeInUp">
-              <input type="text" class="form-control login-field" placeholder="Enter username" id="login-name" name="adhaar" required autofocus value={{request.form.adhaar}}>
-              <label class="login-field-icon fui-user" for="login-name"></label>
-            </div>
+      <div class="form-group animated fadeInUp">
+        <input type="date" name="dob" class="form-control login-field" value=""  placeholder="dd/mm/yyyy" id="login-pass" required autofocus value={{request.form.dob}}>
+        <label class="login-field-icon fui-calendar" for="login-pass"></label>
+      </div>
 
-            <div class="form-group animated fadeInUp">
-              <input type="date" name="dob" class="form-control login-field" value=""  placeholder="dd/mm/yyyy" id="login-pass" required autofocus value={{request.form.dob}}>
-              <label class="login-field-icon fui-calendar" for="login-pass"></label>
-            </div>
-
-    <p><input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit"></p>
-    
-  </form>
-</div>
+      <p><input type="submit" class="btn btn-lg btn-primary btn-block" value="Submit"></p>
+      
+    </form>
+  </div>
 
 </div>
 {% endblock %}
