@@ -8,12 +8,24 @@ from flask import (Flask, flash, jsonify, logging, redirect, render_template,
 #from flask_mysqldb import MySQL
 # from forms import PostForm, RegisterForm
 # from passlib.hash import sha256_crypt
+from flask_mysqldb import MySQL
 from utils import parseme
 from solc import compile_source
 from web3 import Web3, HTTPProvider
 from web3.contract import ConciseContract
 
 app = Flask(__name__)
+
+# Enter this information
+HOST = "localhost"
+USERNAME ="root" # change to your username and password
+PASSWORD = "root"
+
+app.config['MYSQL_HOST'] = HOST
+app.config['MYSQL_USER'] = USERNAME
+app.config['MYSQL_PASSWORD'] = PASSWORD
+app.config['MYSQL_DB'] = 'project'
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 http_provider = HTTPProvider('http://localhost:8545')
 eth_provider = Web3(http_provider).eth
