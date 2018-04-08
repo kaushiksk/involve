@@ -5,38 +5,47 @@
 
 
 
-<div class="row">
+<div class="container">
 <!--style="position:fixed;  float:none; display: inline-block;-->
-  <div class="col-sm-5" >
-    
-  </div>
+ 
 
-<div class="col-sm-7" style="overflow-y:scroll; height:100vh;">
+<div  class="jumbotron" style="overflow; height:100vh;">
 
   {% for candidate in candidates %}
   {% set name = candidate.name + "-" + candidate.c_id|string %}
-  <div class="row" >
-            <div class="col-md-3" style="height: 30px">
+  <div class="container " align="centre">
+            <div class="col-md-3">
                 <a href="#">
-                    <img class="img-responsive" src="{{candidate.thumb}}" alt="">
-                    <h6 class="cat"><strong>#{{ candidate.party}}</strong></h6	>
+                    <img class="img-responsive" src="{{candidate.thumb}}" alt="" width="90" height="120">
+                    
                 </a>
             </div>
-            <div class="col-md-9">
+            <div class="col-md-9" style="vertical-align: bottom; display: table-cell; height: 100px" >
+
+                <div style="max-height: 200px;overflow: auto">
 {#                <form>#}
                   <input type="radio" name="voter_id" value={{ name }}>{{ candidate.name }} <br>
 {#                </form>#}
 {#                <h3 class="animated fadeInUp" style="margin-top:0;">{{ candidate.name }}</h3>#}
 {##}
 {#                <button style="margin-left:1%;" class="btn btn-default fui-checkbox-checked archive"  id="{{ candidate.id }}" title="Vote">#}
+                </div>
+
+                <div style="max-height: 200px;overflow: auto">
+                  <h6 class="cat"><strong>#{{ candidate.party}}</strong></h6  >
+                </div>
+
             </div>
+            
         </div>
         <hr class="first">
+        
  
     {% endfor %}
 </div>
-<button type="submit" class="submit-btn">Vote</button>
+<button type="submit" class="submit-btn btn btn-lg btn-primary btn-block">Vote</button>
 </div>
+
 
 {% endblock %}
 

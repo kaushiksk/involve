@@ -142,6 +142,7 @@ def dashboard():
         cur.execute("""SELECT
                         c_id,
                         name,
+                        party,
                         constituency,
                         thumb
                         FROM candidates                        
