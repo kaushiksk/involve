@@ -125,7 +125,7 @@ def login():
         session['username'] = username
         session['admin'] = True
 
-        flash('You are now logged in', 'success')
+        #flash('You are now logged in', 'success')
         return redirect(url_for('transactions'))
 
 
@@ -184,6 +184,10 @@ def vote():
                     (c_id, t_id, stamp) 
                     VALUES({0}, \'{1}\', NOW());""".format(c_id, contract_address))
 
+    cur.execute("""UPDATE candidates
+                    SET votes = votes + 1
+                    WHERE c_id={};""".format(c_id))
+
     cur.close();
 
     mysql.connection.commit()    
@@ -194,10 +198,20 @@ def vote():
 def transactions():
     if  request.method == 'POST':
         # Asking for sepcific candidates transactions
-        candidate = request.json("candidate")
+        c_id = request.json["candidate"] 
+        cur = mysql.connection.cursor()
+        cur.execute("""SELECT
+                        DATE_FORMAT(stamp, '%d/%m/%Y %H:%i:%S') AS timestamp,
+                        t_id
+                        FROM transactions
+                        WHERE c_id=\'{}\'
+                        ORDER BY stamp DESC;""".format(c_id))
 
-        #TODO Query db for candidates transactions
-        transactions = False
+        transactions = list(cur.fetchall())
+        cur.close()
+        print(transactions)
+
+        return jsonify({"data":transactions})
     
     else:
         # GET REQUEST
@@ -234,6 +248,27 @@ def ledger():
                                 )
         constituency, candidate = contract_instance.info()
         return jsonify({"name":candidate.decode(), "constituency":constituency.decode()})
+
+@app.route('/stats', methods=['GET', 'POST'])
+def stats():
+    if request.method == 'POST':
+        constituency = request.json["constituency"]
+        cur = mysql.connection.cursor()
+        cur.execute("""SELECT
+                        name,
+                        party,
+                        votes,
+                        c_id
+                        FROM candidates
+                        WHERE constituency=\'{}\'
+                        ORDER BY votes DESC;""".format(constituency))
+
+        data = list(cur.fetchall())
+        cur.close()
+        return jsonify({"data":data})
+    else:
+        const = ["Mangaluru","Bengaluru"]
+        return render_template('stats.html', constituencies=const)
 
 @app.route('/add_bookmark', methods=['GET', 'POST'])
 def add_bookmark():
@@ -301,15 +336,6 @@ def logout():
     flash('You are now logged out', 'success')
     return redirect(url_for('register'))
 
-
-@app.route('/stats', methods=['GET', 'POST'])
-def stats():
-    if request.method == 'POST':
-        return jsonify({"John": 100, "Smith": 200, "Nick": 150})
-    else:
-        const = ["kar", "tn", "mp", "up"]
-        print(const)
-        return render_template('stats.html', constituencies=const)
 
 
 if __name__ =="__main__":

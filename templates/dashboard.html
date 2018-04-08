@@ -61,7 +61,6 @@
          if (radios[i].checked)
          {
           option = radios[i].value;
-{#          alert(option);#}
           selected = 1;
           break;
          }
@@ -70,26 +69,47 @@
         {
             alert("You have not selected any option");
         }
-        $.ajax({
-			  type: "POST",
-			  contentType: "application/json; charset=utf-8",
-			  url: "/vote",
-			  data: JSON.stringify({ "candidate" :option, "constituency":"Mangaluru"}),
-			  success: function (stuff) {
-            $.alert({
-               title: 'Vote Successfull! Smart Contract deployed!',
-               content: '\n ContractAddr : ' + stuff["address"],
-               icon:'fa fa-check',
-               theme: "modern",
-               type:"green",
-               buttons:{
-                  ok: function(okbutton){
-                    window.location  = '/logout';
-                  }
-               }
-                   });
 
-		        }});
+        else{
+
+          $.confirm({
+                title: "Are you sure you want to vote for " + option.split("-")[0],                 
+                draggable: true,
+                backgroundDismiss: true,
+                theme:"modern",
+                type:"blue",
+                  buttons: {
+                      yes: {
+                        btnClass: 'btn-blue',
+                        action: function (){
+                            $.ajax({
+                                type: "POST",
+                                contentType: "application/json; charset=utf-8",
+                                url: "/vote",
+                                data: JSON.stringify({ "candidate" :option, "constituency":"Mangaluru"}),
+                                success: function (stuff) {
+                                    $.alert({
+                                       title: 'Vote Successfull! Smart Contract deployed!',
+                                       content: '\n ContractAddr : ' + stuff["address"],
+                                       icon:'fa fa-check',
+                                       theme: "modern",
+                                       type:"green",
+                                       buttons:{
+                                          ok: function(okbutton){
+                                            window.location  = '/logout';
+                                          }
+                                       }
+                           });
+                        }
+                      });
+                      }
+                    }
+                  }
+                  });
+          
+
+        }
+        
         
     });
 </script>

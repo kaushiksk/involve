@@ -1,16 +1,20 @@
 {% extends 'layout.html' %}
 {% block body %}
-<div class="col-xs-5">
+<div class="row">
+<div class="col-xs-5" style="margin-bottom:25px;">
   <select class="select select-primary" data-toggle="select" name="consts" id="consts">
       {%  for const in constituencies %}
         <option value={{ const }}>{{ const }}</option>
       {% endfor %}
     </select>
+    <button type="submit" class="btn btn-primary search-btn">Search</button>
 </div>
-<button type="submit" class="btn btn-primary search-btn">Search</button>
+</div>  
 
-    <div class="data"></div>
-
+<div class="row">
+    <div class="col-sm-6"></div>
+    <div class="col-sm-5" style="margin-left:1%; border-left=1px solid #ccc;"></div>
+</div>
 <script>
 
     $(".dropdown-menu li a").click(function(){
@@ -19,6 +23,7 @@
       $(this).parents(".btn-group").find('.selection').val($(this).text());
       alert(x);
     });
+
     $(".search-btn").click(function () {
         var skillsSelect = document.getElementById("consts");
         var selectedText = skillsSelect.options[skillsSelect.selectedIndex].text;
@@ -27,20 +32,46 @@
 			  contentType: "application/json; charset=utf-8",
 			  url: "/stats",
 			  data: JSON.stringify({ "constituency" :selectedText}),
-              success: function (stuff) {
-                      var a = stuff['John'] ;
-                      var b = stuff['Smith'];
+              success: function (result) {
+                $(".col-sm-6").empty();
+                  if(result["data"].length == 0){
+                        $(".col-sm-6").html('<h2>  No entries match your query </h2>');
+                    }
+                    else{
+                    var htmlstring = '';
+                    result["data"].forEach(function(entry){
+                        htmlstring+='<div class="row" style=" border-bottom: 1px solid #ccc;""> <div class="col-md-4"><h3>' + entry.name +'</h3></div><div class="col-md-4"><h3> Votes: ' + entry.votes + '</h3> </div>';
 
-{#                    $.alert({#}
-{#                        title: 'Smart Contract Information',#}
-{#                        content: 'Constituency : ' + stuff['John'],#}
-{#                        icon: 'fa fa-check',#}
-{#                        theme: "modern",#}
-{#                        type: "green"#}
-{#                    });#}
+                        htmlstring+='<div class="col-md-2"> <button type="submit" class="get-contracts btn btn-primary search-btn" id="'+ entry.c_id + '" style="margin-top:20%;">View Contracts</button></div></div>';
+                        });
+                    $(".col-sm-6").html(htmlstring);
+                  }
+
+                  
                 }
 			  });
     });
+
+    $(document).on('click', '.get-contracts', function(){
+      var id = this.id;
+      $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: "/transactions",
+        data: JSON.stringify({ "candidate" :id}),
+        success: function (result) {
+                $(".col-sm-5").empty();
+                    var htmlstring = '';
+                    result["data"].forEach(function(entry){
+                        htmlstring+='<div class="row" style=" border-bottom: 1px solid #ccc;""> <div class="col-md-5"><p>' + entry.t_id +'</p> </div></div>';
+                        });
+                    $(".col-sm-5").html(htmlstring);
+                  }
+
+      });
+    });
+
+  
 
 </script>
 {% endblock %}
