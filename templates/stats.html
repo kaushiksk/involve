@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="col-xs-5">
+  <select class="select select-primary" data-toggle="select" name="consts" id="consts">
+      {%  for const in constituencies %}
+        <option value={{ const }}>{{ const }}</option>
+      {% endfor %}
+    </select>
+</div>
+<button type="submit" class="btn btn-primary search-btn">Search</button>
+
+    <div class="data"></div>
+
+<script>
+
+    $(".dropdown-menu li a").click(function(){
+
+      $(this).parents(".btn-group").find('.selection').text($(this).text());
+      $(this).parents(".btn-group").find('.selection').val($(this).text());
+      alert(x);
+    });
+    $(".search-btn").click(function () {
+        var skillsSelect = document.getElementById("consts");
+        var selectedText = skillsSelect.options[skillsSelect.selectedIndex].text;
+        $.ajax({
+			  type: "POST",
+			  contentType: "application/json; charset=utf-8",
+			  url: "/stats",
+			  data: JSON.stringify({ "constituency" :selectedText}),
+              success: function (stuff) {
+                      var a = stuff['John'] ;
+                      var b = stuff['Smith'];
+
+{#                    $.alert({#}
+{#                        title: 'Smart Contract Information',#}
+{#                        content: 'Constituency : ' + stuff['John'],#}
+{#                        icon: 'fa fa-check',#}
+{#                        theme: "modern",#}
+{#                        type: "green"#}
+{#                    });#}
+                }
+			  });
+    });
+
+</script>
+{% endblock %}

@@ -302,6 +302,16 @@ def logout():
     return redirect(url_for('register'))
 
 
+@app.route('/stats', methods=['GET', 'POST'])
+def stats():
+    if request.method == 'POST':
+        return jsonify({"John": 100, "Smith": 200, "Nick": 150})
+    else:
+        const = ["kar", "tn", "mp", "up"]
+        print(const)
+        return render_template('stats.html', constituencies=const)
+
+
 if __name__ =="__main__":
     app.secret_key = 'secret123'
     app.config['TEMPLATES_AUTO_RELOAD'] = True
