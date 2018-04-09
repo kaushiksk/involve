@@ -1,6 +1,7 @@
 # Involve - Ballot papers on ethereum smart contracts
 Bringing transparency and security to voting using the ethereum blockchain.
 
+> This project was created in 24 hours as part of Microsoft's code.fun.do hackathon at NITK Surathkal
 # How it works
 - Every time a vote is cast, a new smart contract is deployed on the ethereum blockchain. This 
   contains the constituency and the candidate that was voted for.
