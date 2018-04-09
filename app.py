@@ -15,7 +15,7 @@ app = Flask(__name__)
 # Enter this information
 HOST = "localhost"
 USERNAME = "root"  # change to your username and password
-PASSWORD = "appu"  # Kernelpanic
+PASSWORD = "password" # change to your password
 
 app.config['MYSQL_HOST'] = HOST
 app.config['MYSQL_USER'] = USERNAME
