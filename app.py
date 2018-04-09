@@ -6,9 +6,6 @@ from pprint import pprint
 from flask import (Flask, flash, jsonify, logging, redirect, render_template,
                    request, session, url_for)
 from flask_mysqldb import MySQL
-# from forms import PostForm, RegisterForm
-# from passlib.hash import sha256_crypt
-from utils import parseme
 from solc import compile_source
 from web3 import Web3, HTTPProvider
 from web3.contract import ConciseContract
@@ -17,8 +14,8 @@ app = Flask(__name__)
 
 # Enter this information
 HOST = "localhost"
-USERNAME ="root" # change to your username and password
-PASSWORD = "appu" #Kernelpanic
+USERNAME = "root"  # change to your username and password
+PASSWORD = "appu"  # Kernelpanic
 
 app.config['MYSQL_HOST'] = HOST
 app.config['MYSQL_USER'] = USERNAME
@@ -26,7 +23,7 @@ app.config['MYSQL_PASSWORD'] = PASSWORD
 app.config['MYSQL_DB'] = 'codefundo'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
-#init MYSQL_DB
+# init MYSQL_DB
 mysql = MySQL(app)
 
 http_provider = HTTPProvider('http://localhost:8545')
@@ -63,28 +60,29 @@ def home():
     if 'logged_in' in session:
         return redirect(url_for('dashboard'))
 
-    
     return render_template('index.html')
 
 # User signup
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    
+
     if request.method == 'POST':
         # Get form feilds
         adhaar = request.form['adhaar']
         dob = request.form['dob']
-     
+
         cur = mysql.connection.cursor()
         cur.execute("""SELECT
                         *
-                        FROM voters                        
+                        FROM voters
                         WHERE u_id=\'{}\';""".format(adhaar))
 
         data = list(cur.fetchall())
         cur.close()
 
-        if(len(data)==0):
+        if(len(data) == 0):
             cur = mysql.connection.cursor()
             cur.execute("""INSERT INTO
                         voters
@@ -106,10 +104,11 @@ def register():
         flash('You can now vote!', 'success')
         return redirect(url_for('dashboard'))
 
-
     return render_template('register.html')
 
 # User login
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'logged_in' in session:
@@ -119,7 +118,6 @@ def login():
         # Get form feilds
         username = request.form['username']
         password_candidate = request.form['password']
-     
 
         session['logged_in'] = True
         session['username'] = username
@@ -128,15 +126,17 @@ def login():
         #flash('You are now logged in', 'success')
         return redirect(url_for('transactions'))
 
-
     return render_template('login.html')
 
-#Dashboard routes
+# Dashboard routes
+
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if 'logged_in' in session:
 
-        myuser = {"first_name":"sadf", "last_name":"sadf", "roll_no":"123", "email":"sadf@asdf.com", "d_name":"dsadf", "constituency":"Mangaluru"}
+        myuser = {"first_name": "sadf", "last_name": "sadf", "roll_no": "123",
+                  "email": "sadf@asdf.com", "d_name": "dsadf", "constituency": "Mangaluru"}
 
         cur = mysql.connection.cursor()
         cur.execute("""SELECT
@@ -145,7 +145,7 @@ def dashboard():
                         party,
                         constituency,
                         thumb
-                        FROM candidates                        
+                        FROM candidates
                         WHERE constituency=\'{}\';""".format(myuser["constituency"]))
 
         candidates = list(cur.fetchall())
@@ -162,7 +162,8 @@ def dashboard():
         flash('You need to be logged in to access!', 'danger')
         return redirect(url_for('login'))
 
-@app.route('/vote', methods=['GET','POST'])
+
+@app.route('/vote', methods=['GET', 'POST'])
 def vote():
     print(request.json["candidate"])
     [candidate, c_id] = request.json["candidate"].split("-")
@@ -170,35 +171,37 @@ def vote():
     print(candidate, constituency)
 
     transaction_hash = contract_factory.constructor(
-                            constituency.encode(), candidate.encode()).transact(transaction=transaction_details)
+        constituency.encode(), candidate.encode()).transact(transaction=transaction_details)
 
     transaction_receipt = eth_provider.getTransactionReceipt(transaction_hash)
     contract_address = transaction_receipt['contractAddress']
 
-    #TODO Add transaction address with timestamp into DB with candidate foreign key
+    # TODO Add transaction address with timestamp into DB with candidate
+    # foreign key
 
     cur = mysql.connection.cursor()
-    cur.execute("""INSERT 
-                    INTO 
+    cur.execute("""INSERT
+                    INTO
                     transactions
-                    (c_id, t_id, stamp) 
+                    (c_id, t_id, stamp)
                     VALUES({0}, \'{1}\', NOW());""".format(c_id, contract_address))
 
     cur.execute("""UPDATE candidates
                     SET votes = votes + 1
                     WHERE c_id={};""".format(c_id))
 
-    cur.close();
+    cur.close()
 
-    mysql.connection.commit()    
+    mysql.connection.commit()
 
     return jsonify({"address": contract_address})
 
-@app.route('/transactions', methods=['GET','POST'])
+
+@app.route('/transactions', methods=['GET', 'POST'])
 def transactions():
-    if  request.method == 'POST':
+    if request.method == 'POST':
         # Asking for sepcific candidates transactions
-        c_id = request.json["candidate"] 
+        c_id = request.json["candidate"]
         cur = mysql.connection.cursor()
         cur.execute("""SELECT
                         DATE_FORMAT(stamp, '%d/%m/%Y %H:%i:%S') AS timestamp,
@@ -211,8 +214,8 @@ def transactions():
         cur.close()
         print(transactions)
 
-        return jsonify({"data":transactions})
-    
+        return jsonify({"data": transactions})
+
     else:
         # GET REQUEST
         cur = mysql.connection.cursor()
@@ -224,8 +227,9 @@ def transactions():
 
         transactions = list(cur.fetchall())
         cur.close()
-    
+
     return render_template('ledger.html', transactions=transactions)
+
 
 @app.route('/ledger', methods=['GET', 'POST'])
 def ledger():
@@ -236,18 +240,19 @@ def ledger():
         #                 name,
         #                 constituency
         #                 FROM candidates C JOIN transactions T
-        #                 ON C.c_id=T.c_id                      
+        #                 ON C.c_id=T.c_id
         #                 WHERE t_id=\'{}\';""".format(address))
 
         # candidate = list(cur.fetchall())[0]
         # cur.close()
         contract_instance = eth_provider.contract(
-                                abi=contract_abi,
-                                address=address,
-                                ContractFactoryClass=ConciseContract
-                                )
+            abi=contract_abi,
+            address=address,
+            ContractFactoryClass=ConciseContract
+        )
         constituency, candidate = contract_instance.info()
-        return jsonify({"name":candidate.decode(), "constituency":constituency.decode()})
+        return jsonify({"name": candidate.decode(), "constituency": constituency.decode()})
+
 
 @app.route('/stats', methods=['GET', 'POST'])
 def stats():
@@ -265,46 +270,24 @@ def stats():
 
         data = list(cur.fetchall())
         cur.close()
-        return jsonify({"data":data})
+        return jsonify({"data": data})
     else:
-        const = ["Mangaluru","Bengaluru"]
+        const = ["Mangaluru", "Bengaluru"]
         return render_template('stats.html', constituencies=const)
-
-@app.route('/add_bookmark', methods=['GET', 'POST'])
-def add_bookmark():
-    form = PostForm(request.form)
-    if  request.method == 'POST' and form.validate():
-        url = form.url.data
-        cat = form.cat.data
-
-        try:
-            return redirect(url_for('dashboard'))
-
-        except:
-            flash("gg", 'danger')
-            return render_template('add_bookmark.html', form=form)
-
-    return render_template('add_bookmark.html', form=form)
 
 
 @app.route('/myaccount', methods=['GET'])
 def myaccount():
     if 'logged_in' in session:
-        '''
-        stats = {"total" : len(mybookmarks),
-                 "unread" : len(mybookmarks) - unread,
-                 "archived": unread,
-                 }
-        '''
+        myuser = {"first_name": "sadf", "last_name": "sadf",
+                  "roll_no": "123", "email": "sadf@asdf.com", "d_name": "dsadf"}
 
-        myuser = {"first_name":"sadf", "last_name":"sadf", "roll_no":"123", "email":"sadf@asdf.com", "d_name":"dsadf"}
-
-        stats = {"total" : 5,
-                 "unread" : 10,
+        stats = {"total": 5,
+                 "unread": 10,
                  "archived": 2,
                  }
 
-        #return render_template('myaccount.html')
+        # return render_template('myaccount.html')
         return render_template('myaccount.html', myuser=myuser, stats=stats)
 
     else:
@@ -312,22 +295,13 @@ def myaccount():
         return redirect(url_for('login'))
 
 
-@app.route('/archive-toggle', methods=['POST'])
-def archive():   
-    return jsonify({"data":"pass"})
-
-# Data request for doughnut chart comes here
 @app.route('/get-pie-data', methods=['GET'])
-def getpiedata ():
+def getpiedata():
 
-    data = [{"category":"A", "count":5}, {"category":"B", "count":10}, {"category":"C", "count":6}]
+    data = [{"category": "A", "count": 5}, {
+        "category": "B", "count": 10}, {"category": "C", "count": 6}]
 
-    return jsonify({"data":data})
-
-# Route for adding bookmark from the Explore page
-@app.route('/add-mybookmark', methods=['POST'])
-def addmybookmark():
-    return jsonify({"data":"pass"})
+    return jsonify({"data": data})
 
 
 @app.route('/logout')
@@ -337,8 +311,7 @@ def logout():
     return redirect(url_for('register'))
 
 
-
-if __name__ =="__main__":
+if __name__ == "__main__":
     app.secret_key = 'secret123'
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.run(host="localhost", debug=True, threaded=True)
