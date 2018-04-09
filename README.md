@@ -12,5 +12,5 @@ Bringing transparency and security to voting using the ethereum blockchain.
  - __`[ganache-cli](https://github.com/trufflesuite/ganache-cli/)`__  : It provides a local ethereum network for us to interact with.
  - `web3.py` : Python wrapper around __Web3.js__. It helps us connect to the ethereum network and deploy smart contract or make transactions
 
-
+Using the [Flat UI](https://designmodo.github.io/Flat-UI/) theme.
 
