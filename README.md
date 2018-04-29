@@ -21,3 +21,6 @@ Bringing transparency and security to voting using the ethereum blockchain.
 - Run `$ python app.py`.
 
 Using the [Flat UI](https://designmodo.github.io/Flat-UI/) theme.
+
+## Disclaimer
+This is a proof-of-concept application to demonstarte the use of ethereum smart contracts as ballot papers. Since it was built during a 24 hours hackathon some of the pages (login, candidate list) are representative only.
